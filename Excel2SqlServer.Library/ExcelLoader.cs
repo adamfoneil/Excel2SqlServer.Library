@@ -7,11 +7,10 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace Excel2SqlServer.Library
 {
-	public class ExcelLoader
+    public class ExcelLoader
 	{
 		public void CreateTable(string fileName, SqlConnection connection, string schemaName, string tableName, IEnumerable<string> customColumns = null)
 		{
