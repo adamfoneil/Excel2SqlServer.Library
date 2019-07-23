@@ -23,7 +23,7 @@ using (var stream = await blob.OpenReadAsync())
         int rows = loader.Save(stream, cn, "dbo", "MyTable", truncateFirst: true, customColumns: new string[]
         {
             "[IsProcessed] bit NOT NULL DEFAULT (0)",
-			"[DateUploaded] datetime NOT NULL DEFAULT getdate()"
+            "[DateUploaded] datetime NOT NULL DEFAULT getdate()"
         });
     }
 }
