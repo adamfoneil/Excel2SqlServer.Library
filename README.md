@@ -29,19 +29,3 @@ using (var stream = await blob.OpenReadAsync())
 }
 ```
 This will append some extra columns to the table when it's created `IsProcessed` and `DateUploaded`.
-
-In addition to adding custom columns, you can run a callback method on each row as it's being imported like this:
-```
-using (var stream = GetStream())
-{
-    using (var cn = GetConnection())
-    {
-        var loader = new ExcelLoader();
-        loader.Save(stream, cn, "dbo", "MyTable", onEachRow: (row) =>
-        {
-            row["Field1"] = "some value";
-            row["Field2"] = "another value";
-        });
-    }
-}
-```
