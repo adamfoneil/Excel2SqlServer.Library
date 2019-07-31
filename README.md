@@ -13,7 +13,7 @@ using (var cn = GetConnection())
 ```
 This will save an Excel file called `MyFile.xlsx` to a database table `dbo.MyTable`. The table is created if it doesn't exist.
 
-By default, data is always appended to existing data. You can set the optional `bool truncateFirst` argument to `true` to empty the table before each load. You can also pass custom columns in the `Save` call to capture run-time specific info that might not be in the data. For example:
+By default, data is always appended to existing data. You can set the optional `bool truncateFirst` argument to `true` to empty the table before each load. You can also pass custom columns in the form of SQL column definitions in the `Save` call to capture run-time specific info that might not be in the data. For example:
 ```
 using (var stream = await blob.OpenReadAsync())
 {
@@ -29,3 +29,19 @@ using (var stream = await blob.OpenReadAsync())
 }
 ```
 This will append some extra columns to the table when it's created `IsProcessed` and `DateUploaded`.
+
+In addition to adding custom columns, you can run a callback method on each row as it's being imported like this:
+```
+using (var stream = GetStream())
+{
+    using (var cn = GetConnection())
+    {
+        var loader = new ExcelLoader();
+        loader.Save(stream, cn, "dbo", "MyTable", onEachRow: (row) =>
+        {
+            row["Field1"] = "some value";
+            row["Field2"] = "another value";
+        });
+    }
+}
+```
