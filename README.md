@@ -2,7 +2,7 @@ This is a library for importing Excel spreadsheets into SQL Server tables using 
 
 Nuget package: **Excel2SqlServer**
 
-In a nutshell, use the [ExcelLoader](https://github.com/adamosoftware/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs) class and call one of the Save overloads [Save string](https://github.com/adamosoftware/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L66) or [Save Stream](https://github.com/adamosoftware/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L72)
+In a nutshell, use the [ExcelLoader](https://github.com/adamosoftware/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs) class and call one of the Save overloads [Save string](https://github.com/adamosoftware/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L65) or [Save Stream](https://github.com/adamosoftware/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L71)
 
 ```
 using (var cn = GetConnection())
@@ -13,7 +13,7 @@ using (var cn = GetConnection())
 ```
 This will save an Excel file called `MyFile.xlsx` to a database table `dbo.MyTable`. The table is created if it doesn't exist.
 
-By default, data is always appended to existing data. You can set the optional `bool truncateFirst` argument to `true` to empty the table before each load. You can also pass custom columns in the `Save` call to capture run-time specific info that might not be in the data. For exanmple:
+By default, data is always appended to existing data. You can set the optional `bool truncateFirst` argument to `true` to empty the table before each load. You can also pass custom columns in the `Save` call to capture run-time specific info that might not be in the data. For example:
 ```
 using (var stream = await blob.OpenReadAsync())
 {
