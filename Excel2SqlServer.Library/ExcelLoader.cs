@@ -62,33 +62,32 @@ namespace Excel2SqlServer.Library
 			}
 		}
 
-		public int Save(string fileName, SqlConnection connection, string schemaName, string tableName, bool truncateFirst = false, IEnumerable<string> customColumns = null, Action<DataRow> onEachRow = null)
+		public int Save(string fileName, SqlConnection connection, string schemaName, string tableName, bool truncateFirst = false, IEnumerable<string> customColumns = null)
 		{
 			var ds = Read(fileName);
-			return SaveInner(connection, schemaName, tableName, truncateFirst, customColumns, ds, onEachRow);
+			return SaveInner(connection, schemaName, tableName, truncateFirst, customColumns, ds);
 		}
 
-		public int Save(Stream stream, SqlConnection connection, string schemaName, string tableName, bool truncateFirst = false, IEnumerable<string> customColumns = null, Action<DataRow> onEachRow =  null)
+		public int Save(Stream stream, SqlConnection connection, string schemaName, string tableName, bool truncateFirst = false, IEnumerable<string> customColumns = null)
 		{
 			var ds = Read(stream);
-			return SaveInner(connection, schemaName, tableName, truncateFirst, customColumns, ds, onEachRow);
+			return SaveInner(connection, schemaName, tableName, truncateFirst, customColumns, ds);
 		}
 
-		private int SaveInner(SqlConnection connection, string schemaName, string tableName, bool truncateFirst, IEnumerable<string> customColumns, DataSet ds, Action<DataRow> onEachRow = null)
+		private int SaveInner(SqlConnection connection, string schemaName, string tableName, bool truncateFirst, IEnumerable<string> customColumns, DataSet ds)
 		{
 			if (!connection.TableExists(schemaName, tableName)) CreateTableInner(ds, connection, schemaName, tableName, customColumns);
-			SaveDataTable(connection, ds.Tables[0], schemaName, tableName, truncateFirst, onEachRow);
+			SaveDataTable(connection, ds.Tables[0], schemaName, tableName, truncateFirst);
 			return ds.Tables[0].Rows.Count;
 		}
 
-		private void SaveDataTable(SqlConnection connection, DataTable table, string schemaName, string tableName, bool truncateFirst, Action<DataRow> onEachRow = null)
+		private void SaveDataTable(SqlConnection connection, DataTable table, string schemaName, string tableName, bool truncateFirst)
 		{
 			if (truncateFirst) connection.Execute($"TRUNCATE TABLE [{schemaName}].[{tableName}]");
 
 			// thanks to https://stackoverflow.com/a/4582786/2023653
 			foreach (DataRow row in table.Rows)
 			{
-                onEachRow?.Invoke(row);
 				row.AcceptChanges();
 				row.SetAdded();
 			}
