@@ -42,7 +42,8 @@ namespace Testing
                     "6/31/09",
                     "2/29/03",
                     "14/1/05",
-                    "3/4/1634" // note this is a valid date, but not a valid datetime. I'm checking datetime in this test
+                    "3/4/1634", // note this is a valid date, but not a valid datetime. I'm checking datetime in this test
+                    "qxr2947"
                 };
 
                 // dates are loaded as strings, so they are all "valid" at this point
