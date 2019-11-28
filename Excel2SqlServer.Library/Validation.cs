@@ -47,8 +47,9 @@ namespace Excel2SqlServer.Library
             return results;
         }
 
-        public static async Task<IEnumerable<ValidationInfo>> ValidateSqlServerTypeConversionAsync<TKey>(
-            SqlConnection connection, string schema, string table, string keyColumn, string convertColumn, string convertType, string criteria = null)
+        public static async Task<IEnumerable<ValidationInfo>> ValidateSqlServerTypeConversionAsync<TKey, TValue>(
+            SqlConnection connection, string schema, string table, string keyColumn, string convertColumn, string convertType, 
+            string criteria = null)
         {
             string whereClause = (!string.IsNullOrEmpty(criteria)) ? " WHERE " + criteria : string.Empty;
             var keys = await connection.QueryAsync<TKey>($"SELECT [{keyColumn}] FROM [{schema}].[{table}]{whereClause}");
@@ -70,7 +71,7 @@ namespace Excel2SqlServer.Library
 
                     try
                     {
-                        offendingValue = await connection.QuerySingleOrDefaultAsync(srcValueQuery, new { key });
+                        offendingValue = await connection.QuerySingleOrDefaultAsync<TValue>(srcValueQuery, new { key });
                     }
                     catch (Exception excInner)
                     {
