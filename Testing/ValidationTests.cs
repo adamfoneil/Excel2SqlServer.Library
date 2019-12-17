@@ -43,7 +43,8 @@ namespace Testing
                     "2/29/03",
                     "14/1/05",
                     "3/4/1634", // note this is a valid date, but not a valid datetime. I'm checking datetime in this test
-                    "qxr2947"
+                    "qxr2947",
+                    "1/1/1693" // case from an AH upload that failed
                 };
 
                 // dates are loaded as strings, so they are all "valid" at this point
