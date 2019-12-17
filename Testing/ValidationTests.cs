@@ -51,7 +51,9 @@ namespace Testing
                 CreateDateValues(cn, validDates.Concat(invalidDates));
 
                 // now we find the actual invalid datetimes
-                var results = Validation.ValidateSqlServerTypeConversionAsync<string, string>(cn, "dbo", "DateValidation", "ProposedDate", "ProposedDate", "datetime").Result;
+                var results = Validation.ValidateSqlServerTypeConversionAsync<string, string>(cn, 
+                    "dbo", "DateValidation", 
+                    "ProposedDate", "ProposedDate", "datetime").Result;
 
                 // the "offending values" should be exactly the same as the invalidDates above
                 var discoveredValuesSorted = results.Select(info => info.OffendingValue.ToString()).OrderBy(s => s).ToArray();
