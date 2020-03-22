@@ -34,7 +34,9 @@ namespace Excel2SqlServer.Library
 				{ typeof(int), "int" },
 				{ typeof(string), "nvarchar(max)" },
 				{ typeof(DateTime), "datetime" },
-				{ typeof(bool), "bit" }
+				{ typeof(bool), "bit" },
+				{ typeof(double), "float" },
+				{ typeof(decimal), "decimal" }
 			};
 
 			IEnumerable<string> getColumns(DataTable dataTable)

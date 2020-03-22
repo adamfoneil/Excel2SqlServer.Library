@@ -10,7 +10,8 @@
     <PackageProjectUrl>https://github.com/adamosoftware/Excel2SqlServer.Library</PackageProjectUrl>
     <RepositoryUrl>https://github.com/adamosoftware/Excel2SqlServer.Library</RepositoryUrl>
     <Description>Library for importing Excel spreadsheets into SQL Server tables</Description>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
+    <PackageReleaseNotes>added support for decimal and double types</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
