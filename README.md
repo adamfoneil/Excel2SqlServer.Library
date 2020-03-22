@@ -36,8 +36,9 @@ Note, if you see an error like this...
 
 ![img](https://adamosoftware.blob.core.windows.net:443/images/encoding-error.png)
 
-... try adding this line before you use `ExcelLoader`:
-Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-```csharp
+...try adding this line before you use `ExcelLoader`:
 
+
+```csharp
+Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 ```
