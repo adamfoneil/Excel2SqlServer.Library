@@ -29,3 +29,15 @@ using (var stream = await blob.OpenReadAsync())
 }
 ```
 This will append some extra columns to the table when it's created `IsProcessed` and `DateUploaded`.
+
+## An encoding error you might see
+
+Note, if you see an error like this...
+
+![img](https://adamosoftware.blob.core.windows.net:443/images/encoding-error.png)
+
+... try adding this line before you use `ExcelLoader`:
+Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+```csharp
+
+```
