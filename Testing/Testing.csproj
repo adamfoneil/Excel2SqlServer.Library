@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\case01.xlsx" />
+    <None Remove="Resources\case02.xlsx" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.0.0" />
     <PackageReference Include="MSTest.TestFramework" Version="2.0.0" />
@@ -20,6 +25,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Excel2SqlServer.Library\Excel2SqlServer.Library.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\case01.xlsx" />
+    <EmbeddedResource Include="Resources\case02.xlsx" />
   </ItemGroup>
 
 </Project>
