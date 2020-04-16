@@ -64,28 +64,28 @@ namespace Excel2SqlServer.Library
 			}
 		}
 
-		public int Save(string fileName, SqlConnection connection, string schemaName, string tableName, bool truncateFirst = false, IEnumerable<string> customColumns = null)
+		public int Save(string fileName, SqlConnection connection, string schemaName, string tableName, Options options = null)
 		{
 			var ds = Read(fileName);
-			return SaveInner(connection, schemaName, tableName, truncateFirst, customColumns, ds);
+			return SaveInner(connection, schemaName, tableName, ds, options);
 		}
 
-		public int Save(Stream stream, SqlConnection connection, string schemaName, string tableName, bool truncateFirst = false, IEnumerable<string> customColumns = null)
+		public int Save(Stream stream, SqlConnection connection, string schemaName, string tableName, Options options = null)
 		{
 			var ds = Read(stream);
-			return SaveInner(connection, schemaName, tableName, truncateFirst, customColumns, ds);
+			return SaveInner(connection, schemaName, tableName, ds, options);
 		}
 
-		private int SaveInner(SqlConnection connection, string schemaName, string tableName, bool truncateFirst, IEnumerable<string> customColumns, DataSet ds)
-		{
-			if (!connection.TableExists(schemaName, tableName)) CreateTableInner(ds, connection, schemaName, tableName, customColumns);
-			SaveDataTable(connection, ds.Tables[0], schemaName, tableName, truncateFirst);
+		private int SaveInner(SqlConnection connection, string schemaName, string tableName, DataSet ds, Options options)
+        {
+			if (!connection.TableExists(schemaName, tableName)) CreateTableInner(ds, connection, schemaName, tableName, options?.CustomColumns);
+			SaveDataTable(connection, ds.Tables[0], schemaName, tableName, options);
 			return ds.Tables[0].Rows.Count;
 		}
 
-		private void SaveDataTable(SqlConnection connection, DataTable table, string schemaName, string tableName, bool truncateFirst)
+		private void SaveDataTable(SqlConnection connection, DataTable table, string schemaName, string tableName, Options options)
 		{
-			if (truncateFirst) connection.Execute($"TRUNCATE TABLE [{schemaName}].[{tableName}]");
+			if (options?.TruncateFirst ?? false) connection.Execute($"TRUNCATE TABLE [{schemaName}].[{tableName}]");
 
 			// thanks to https://stackoverflow.com/a/4582786/2023653
 			foreach (DataRow row in table.Rows)
@@ -104,6 +104,33 @@ namespace Excel2SqlServer.Library
 						adapter.Update(table);
 					}
 				}
+			}
+
+			if (options?.AutoTrimStrings ?? false)
+			{
+				var updateCmds = BuildTrimCommands(connection, schemaName, tableName);
+				foreach (var cmd in updateCmds) connection.Execute(cmd);
+			}
+		}
+
+		/// <summary>
+		/// returns update statements for each varchar column in specified table that calls LTRIM(RTRIM()) on varchar columns
+		/// </summary>
+		private IEnumerable<string> BuildTrimCommands(SqlConnection connection, string schemaName, string tableName)
+		{
+			var stringColumns = connection.Query<string>(
+				@"SELECT 
+					[col].[name]
+				FROM 
+					[sys].[columns] [col] INNER JOIN [sys].[tables] [t] ON [col].[object_id]=[t].[object_id]
+				WHERE 
+					SCHEMA_NAME([t].[schema_id])=@schemaName AND 
+					[t].[name]=@tableName AND
+					TYPE_NAME([col].[system_type_id]) IN ('varchar', 'nvarchar')", new { schemaName, tableName });
+
+			foreach (var col in stringColumns)
+			{
+				yield return $"UPDATE [{schemaName}].[{tableName}] SET [{col}]=LTRIM(RTRIM([{col}])) WHERE [{col}] IS NOT NULL";
 			}
 		}
 
