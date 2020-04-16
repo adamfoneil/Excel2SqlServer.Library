@@ -13,17 +13,22 @@ using (var cn = GetConnection())
 ```
 This will save an Excel file called `MyFile.xlsx` to a database table `dbo.MyTable`. The table is created if it doesn't exist.
 
-By default, data is always appended to existing data. You can set the optional `bool truncateFirst` argument to `true` to empty the table before each load. You can also pass custom columns in the form of SQL column definitions in the `Save` call to capture run-time specific info that might not be in the data. For example:
+By default, data is always appended to existing data. You can pass an optional [Options](https://github.com/adamosoftware/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs) object customize the load behavior. For example:
 ```csharp
 using (var stream = await blob.OpenReadAsync())
 {
     using (var cn = GetConnection())
     {
         var loader = new ExcelLoader();
-        int rows = loader.Save(stream, cn, "dbo", "MyTable", truncateFirst: true, customColumns: new string[]
+        int rows = loader.Save(stream, cn, "dbo", "MyTable", new Options() 
         {
-            "[IsProcessed] bit NOT NULL DEFAULT (0)",
-            "[DateUploaded] datetime NOT NULL DEFAULT getdate()"
+            TruncateFirst = true,
+            AutoTrimStrings = true,
+            CustomColumns = new string[]
+            {
+                "[IsProcessed] bit NOT NULL DEFAULT (0)",
+                "[DateUploaded] datetime NOT NULL DEFAULT getdate()"
+            }
         });
     }
 }
