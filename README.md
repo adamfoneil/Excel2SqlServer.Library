@@ -13,7 +13,7 @@ using (var cn = GetConnection())
 ```
 This will save an Excel file called `MyFile.xlsx` to a database table `dbo.MyTable`. The table is created if it doesn't exist. Note also there is an `int identity(1,1)` column created called `Id`.
 
-By default, data is always appended to existing data. You can pass an optional [Options](https://github.com/adamosoftware/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs) object customize the load behavior. For example:
+By default, data is always appended to existing data. You can pass an optional [Options](https://github.com/adamosoftware/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs) object to customize the load behavior. For example:
 ```csharp
 using (var stream = await blob.OpenReadAsync())
 {
@@ -24,6 +24,7 @@ using (var stream = await blob.OpenReadAsync())
         {
             TruncateFirst = true,
             AutoTrimStrings = true,
+            RemoveNonPrintingChars = true,
             CustomColumns = new string[]
             {
                 "[IsProcessed] bit NOT NULL DEFAULT (0)",
