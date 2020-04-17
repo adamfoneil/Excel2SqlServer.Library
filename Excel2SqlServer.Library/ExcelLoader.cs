@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using DataTables.Library;
 using Excel2SqlServer.Library.Extensions;
 using ExcelDataReader;
 using System;
@@ -7,6 +8,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Excel2SqlServer.Library
 {
@@ -106,19 +108,57 @@ namespace Excel2SqlServer.Library
 				}
 			}
 
-			if (options?.AutoTrimStrings ?? false)
+			if ((options?.AutoTrimStrings ?? false) || (options?.RemoveNonPrintingChars ?? false))
 			{
-				var updateCmds = BuildTrimCommands(connection, schemaName, tableName);
-				foreach (var cmd in updateCmds) connection.Execute(cmd);
+				var columns = GetVarcharColumns(connection, schemaName, tableName);
+
+				if (options?.AutoTrimStrings ?? false)
+				{
+					var updateCmds = BuildTrimCommands(columns, schemaName, tableName);
+					foreach (var cmd in updateCmds) connection.Execute(cmd);
+				}
+
+				if (options?.RemoveNonPrintingChars ?? false)
+				{
+					const string nonPrintingChars = @"[^\x00-\x7F]+";
+					var dataTable = connection.QueryTable($"SELECT * FROM [{schemaName}].[{tableName}]");
+					foreach (DataRow row in dataTable.Rows)
+					{
+						var expressions = new Dictionary<string, string>();						
+
+						foreach (var col in columns)
+						{
+							if (!row.IsNull(col) && Regex.IsMatch(row.Field<string>(col), nonPrintingChars))
+							{
+								expressions.Add(col, Regex.Replace(row.Field<string>(col), nonPrintingChars, string.Empty).Replace("'", "''"));
+							}
+						}
+
+						if (expressions.Any())
+						{
+							connection.Execute(
+								$"UPDATE [{schemaName}].[{tableName}] SET {string.Join(", ", expressions.Select(kp => $"[{kp.Key}]='{kp.Value}'"))} WHERE [Id]=@id",
+								new { id = row.Field<int>("Id") });
+						}
+					}
+				}
 			}
 		}
 
 		/// <summary>
 		/// returns update statements for each varchar column in specified table that calls LTRIM(RTRIM()) on varchar columns
 		/// </summary>
-		private IEnumerable<string> BuildTrimCommands(SqlConnection connection, string schemaName, string tableName)
+		private IEnumerable<string> BuildTrimCommands(IEnumerable<string> columns, string schemaName, string tableName)
 		{
-			var stringColumns = connection.Query<string>(
+			foreach (var col in columns)
+			{
+				yield return $"UPDATE [{schemaName}].[{tableName}] SET [{col}]=LTRIM(RTRIM([{col}])) WHERE [{col}] IS NOT NULL";
+			}
+		}
+
+		private static IEnumerable<string> GetVarcharColumns(SqlConnection connection, string schemaName, string tableName)
+		{
+			return connection.Query<string>(
 				@"SELECT 
 					[col].[name]
 				FROM 
@@ -127,11 +167,6 @@ namespace Excel2SqlServer.Library
 					SCHEMA_NAME([t].[schema_id])=@schemaName AND 
 					[t].[name]=@tableName AND
 					TYPE_NAME([col].[system_type_id]) IN ('varchar', 'nvarchar')", new { schemaName, tableName });
-
-			foreach (var col in stringColumns)
-			{
-				yield return $"UPDATE [{schemaName}].[{tableName}] SET [{col}]=LTRIM(RTRIM([{col}])) WHERE [{col}] IS NOT NULL";
-			}
 		}
 
 		private SqlCommand BuildSelectCommand(DataTable table, SqlConnection connection, string schemaName, string tableName)
@@ -164,5 +199,4 @@ namespace Excel2SqlServer.Library
 			}
 		}
 	}
-
 }

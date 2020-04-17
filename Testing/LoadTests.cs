@@ -45,12 +45,16 @@ namespace Testing
                     loader.Save(stream, cn, "upload", "Case02", new Options()
                     {
                         TruncateFirst = true,
-                        AutoTrimStrings = true
+                        AutoTrimStrings = true,
+                        RemoveNonPrintingChars = true
                     });
                 }
 
                 var lastNames = cn.Query<string>("SELECT [Last Name] FROM [upload].[Case02]");
                 Assert.IsTrue(lastNames.All(name => name.Equals(name.Trim())));
+
+                var addresses = cn.Query<string>("SELECT [Address] FROM [upload].[Case02]");
+                Assert.IsTrue(addresses.All(address => address.Equals(address.Trim())));
             }
         }
 

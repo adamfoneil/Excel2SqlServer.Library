@@ -6,6 +6,7 @@ namespace Excel2SqlServer.Library
     {
         public bool TruncateFirst { get; set; }
         public bool AutoTrimStrings { get; set; }
+        public bool RemoveNonPrintingChars { get; set; }
         public IEnumerable<string> CustomColumns { get; set; }
     }
 }
