@@ -11,7 +11,7 @@ using (var cn = GetConnection())
     loader.Save("MyFile.xlsx", cn, "dbo", "MyTable");
 }
 ```
-This will save an Excel file called `MyFile.xlsx` to a database table `dbo.MyTable`. The table is created if it doesn't exist.
+This will save an Excel file called `MyFile.xlsx` to a database table `dbo.MyTable`. The table is created if it doesn't exist. Note also there is an `int identity(1,1)` column created called `Id`.
 
 By default, data is always appended to existing data. You can pass an optional [Options](https://github.com/adamosoftware/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs) object customize the load behavior. For example:
 ```csharp
