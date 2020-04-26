@@ -1,3 +1,5 @@
+[![Nuget](https://img.shields.io/nuget/v/Excel2SqlServer)](https://www.nuget.org/packages/Excel2SqlServer/)
+
 This is a library for importing Excel spreadsheets into SQL Server tables using [Excel Data Reader](https://github.com/ExcelDataReader/ExcelDataReader).
 
 Nuget package: **Excel2SqlServer**
