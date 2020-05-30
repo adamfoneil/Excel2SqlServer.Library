@@ -4,16 +4,18 @@ This is a library for importing Excel spreadsheets into SQL Server tables using 
 
 Nuget package: **Excel2SqlServer**
 
-In a nutshell, use the [ExcelLoader](https://github.com/adamosoftware/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs) class and call one of the Save overloads [Save string](https://github.com/adamosoftware/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L69) or [Save Stream](https://github.com/adamosoftware/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L75)
+In a nutshell, use the [ExcelLoader](https://github.com/adamosoftware/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs) class and call one of the `SaveAsync` [overloads](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L108-L130). You can use a local filename or a stream as input. Here's a simple example that loads a single table from a local file:
 
 ```csharp
 using (var cn = GetConnection())
 {
     var loader = new ExcelLoader();
-    loader.Save("MyFile.xlsx", cn, "dbo", "MyTable");
+    await loader.SaveAsync("MyFile.xlsx", cn, "dbo", "MyTable");
 }
 ```
-This will save an Excel file called `MyFile.xlsx` to a database table `dbo.MyTable`. The table is created if it doesn't exist. Note also there is an `int identity(1,1)` column created called `Id`.
+This will save an Excel file called `MyFile.xlsx` to a database table `dbo.MyTable`. The table is created if it doesn't exist. Note also there is an `int identity(1,1)` column created called `Id` if it doesn't already exist in the spreadsheet.
+
+If a spreadsheet has multiple sheets and you want to import all the sheets into multiple tables, omit the schema and table name from the `SaveAsync` call. `ExcelLoader` will use the sheet names in the spreadsheet to build the table names. If you need to customize the table names, you can pass a `Dictionary<string, ObjectName>` where the key represents the sheet name, and the `ObjectName` is the schema + object of the resulting table.
 
 By default, data is always appended to existing data. You can pass an optional [Options](https://github.com/adamosoftware/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs) object to customize the load behavior. For example:
 ```csharp
@@ -22,7 +24,7 @@ using (var stream = await blob.OpenReadAsync())
     using (var cn = GetConnection())
     {
         var loader = new ExcelLoader();
-        int rows = loader.Save(stream, cn, "dbo", "MyTable", new Options() 
+        int rows = await loader.SaveAsync(stream, cn, "dbo", "MyTable", new Options() 
         {
             TruncateFirst = true,
             AutoTrimStrings = true,
@@ -50,3 +52,22 @@ Note, if you see an error like this...
 ```csharp
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 ```
+
+## Reference
+
+- Task [CreateTableAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L18)
+ (string fileName, SqlConnection connection, string schemaName, string tableName, [ IEnumerable<string> customColumns ])
+- Task [CreateTableAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L24)
+ (Stream stream, SqlConnection connection, string schemaName, string tableName, [ IEnumerable<string> customColumns ])
+- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L108)
+ (string fileName, SqlConnection connection, [ Dictionary<string, ObjectName> tableNames ], [ [Options](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs#L5) options ])
+- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L114)
+ (string fileName, SqlConnection connection, string schemaName, string tableName, [ [Options](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs#L5) options ])
+- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L120)
+ (Stream stream, SqlConnection connection, [ Dictionary<string, ObjectName> tableNames ], [ [Options](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs#L5) options ])
+- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L126)
+ (Stream stream, SqlConnection connection, string schemaName, string tableName, [ [Options](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs#L5) options ])
+- Task\<DataSet\> [ReadAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L240)
+ (string fileName)
+- Task\<DataSet\> [ReadAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L248)
+ (Stream stream)
