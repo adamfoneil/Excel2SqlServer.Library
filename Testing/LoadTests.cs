@@ -2,15 +2,12 @@
 using Excel2SqlServer.Library;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SqlServer.LocalDb;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
 
 namespace Testing
 {
@@ -40,7 +37,7 @@ namespace Testing
             using (var cn = LocalDb.GetConnection(dbName))
             {
                 CreateSchema(cn);
-                
+
                 using (var stream = GetResource("case02.xlsx"))
                 {
                     var loader = new ExcelLoader();
@@ -73,7 +70,7 @@ namespace Testing
 
                     Assert.IsTrue(cn.Query<int>("SELECT COUNT(1) FROM [dbo].[Companies]").Count() > 0);
                     Assert.IsTrue(cn.Query<int>("SELECT COUNT(1) FROM [dbo].[People]").Count() > 0);
-                }                   
+                }
             }
         }
 
@@ -106,7 +103,7 @@ namespace Testing
             {
                 connection.Execute(command);
             }
-            catch 
+            catch
             {
                 // do nothing
             }

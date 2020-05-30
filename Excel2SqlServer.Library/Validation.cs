@@ -48,7 +48,7 @@ namespace Excel2SqlServer.Library
         }
 
         public static async Task<IEnumerable<ValidationInfo>> ValidateSqlServerTypeConversionAsync<TKey, TValue>(
-            SqlConnection connection, string schema, string table, string keyColumn, string convertColumn, string convertType, 
+            SqlConnection connection, string schema, string table, string keyColumn, string convertColumn, string convertType,
             string criteria = null)
         {
             string whereClause = (!string.IsNullOrEmpty(criteria)) ? " WHERE " + criteria : string.Empty;
