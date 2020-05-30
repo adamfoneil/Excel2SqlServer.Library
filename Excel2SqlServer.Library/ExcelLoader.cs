@@ -16,21 +16,35 @@ namespace Excel2SqlServer.Library
     public class ExcelLoader
 	{
 		public async Task CreateTableAsync(string fileName, SqlConnection connection, string schemaName, string tableName, IEnumerable<string> customColumns = null)
-		{
-			var ds = await ReadAsync(fileName);
-			CreateTableInner(ds, connection, schemaName, tableName, customColumns);
-		}
+        {
+            var ds = await ReadAsync(fileName);
+            CreateTablesInner(ds, connection, GetObjNameDictionary(ds, schemaName, tableName), customColumns);
+        }
 
-		public async Task CreateTableAsync(Stream stream, SqlConnection connection, string schemaName, string tableName, IEnumerable<string> customColumns = null)
+        public async Task CreateTableAsync(Stream stream, SqlConnection connection, string schemaName, string tableName, IEnumerable<string> customColumns = null)
 		{
 			var ds = await ReadAsync(stream);
-			CreateTableInner(ds, connection, schemaName, tableName, customColumns);
+			CreateTablesInner(ds, connection, GetObjNameDictionary(ds, schemaName, tableName), customColumns);
 		}
 
-		private void CreateTableInner(DataSet ds, SqlConnection connection, string schemaName, string tableName, IEnumerable<string> customColumns)
+		/// <summary>
+		/// for backward compatibility with methods that assumed single worksheet/single table load
+		/// </summary>
+		private static Dictionary<string, ObjectName> GetObjNameDictionary(DataSet ds, string schemaName, string tableName)
 		{
-			var loadTable = ds.Tables[0];
+			return new Dictionary<string, ObjectName>()
+			{
+				{  ds.Tables[0].TableName, new ObjectName() { Schema = schemaName, Name = tableName } }
+			};
+		}
 
+		private static Dictionary<string, ObjectName> GetDefaultTableNaming(DataSet ds, string schema)
+        {
+			return ds.Tables.OfType<DataTable>().ToDictionary(tbl => tbl.TableName, tbl => new ObjectName() { Schema = schema, Name = tbl.TableName });
+        }
+
+		private void CreateTablesInner(DataSet ds, SqlConnection connection, Dictionary<string, ObjectName> tableNames, IEnumerable<string> customColumns)
+		{
 			Dictionary<Type, string> typeMappings = new Dictionary<Type, string>()
 			{
 				{ typeof(object), "nvarchar(max)" },
@@ -42,10 +56,42 @@ namespace Excel2SqlServer.Library
 				{ typeof(decimal), "decimal" }
 			};
 
+			int nameIndex = 0;
+			foreach (DataTable tbl in ds.Tables)
+            {
+				nameIndex++;
+				ObjectName objName = (tableNames.ContainsKey(tbl.TableName)) ?
+					tableNames[tbl.TableName] :
+					new ObjectName() { Schema = "dbo", Name = tbl.TableName + nameIndex.ToString() };
+
+				if (!connection.SchemaExists(objName.Schema))
+                {
+					execute($"CREATE SCHEMA [{objName.Schema}]");					
+                }
+
+				if (!connection.TableExists(objName.Schema, objName.Name))
+                {
+					execute($"CREATE TABLE [{objName.Schema}].[{objName.Name}] (\r\n{string.Join(",\r\n", getColumns(tbl))}\r\n)");
+				}
+			}
+
+			void execute(string command)
+            {
+				using (var cmd = new SqlCommand(command, connection))
+				{
+					if (connection.State == ConnectionState.Closed) connection.Open();
+					cmd.ExecuteNonQuery();
+				}
+			}
+
 			IEnumerable<string> getColumns(DataTable dataTable)
 			{
-				yield return "[Id] int identity(1,1) PRIMARY KEY";
-
+				const string identityCol = "Id";
+				if (!dataTable.Columns.Contains(identityCol))
+                {
+					yield return $"[{identityCol}] int identity(1,1) PRIMARY KEY";
+				}
+				
 				if (customColumns?.Any() ?? false)
 				{
 					foreach (string col in customColumns) yield return col;
@@ -57,44 +103,52 @@ namespace Excel2SqlServer.Library
 					yield return $"[{col.ColumnName}] {typeMappings[col.DataType]} NULL";
 				}
 			};
+		}
 
-			string createCmd = $"CREATE TABLE [{schemaName}].[{tableName}] (\r\n{string.Join(",\r\n", getColumns(loadTable))}\r\n)";
-
-			using (var cmd = new SqlCommand(createCmd, connection))
-			{
-				if (connection.State == ConnectionState.Closed) connection.Open();
-				cmd.ExecuteNonQuery();
-			}
+		public async Task<int> SaveAsync(string fileName, SqlConnection connection, Dictionary<string, ObjectName> tableNames = null, Options options = null)
+        {
+			var ds = await ReadAsync(fileName);
+			return await SaveInnerAsync(connection, ds, tableNames ?? GetDefaultTableNaming(ds, options?.SchemaName ?? "dbo"), options);
 		}
 
 		public async Task<int> SaveAsync(string fileName, SqlConnection connection, string schemaName, string tableName, Options options = null)
 		{
 			var ds = await ReadAsync(fileName);
-			return await SaveInnerAsync(connection, schemaName, tableName, ds, options);
+			return await SaveInnerAsync(connection, ds, GetObjNameDictionary(ds, schemaName, tableName), options);
+		}
+
+		public async Task<int> SaveAsync(Stream stream, SqlConnection connection, Dictionary<string, ObjectName> tableNames = null, Options options = null)
+        {
+			var ds = await ReadAsync(stream);
+			return await SaveInnerAsync(connection, ds, tableNames ?? GetDefaultTableNaming(ds, options?.SchemaName ?? "dbo"), options);
 		}
 
 		public async Task<int> SaveAsync(Stream stream, SqlConnection connection, string schemaName, string tableName, Options options = null)
 		{
 			var ds = await ReadAsync(stream);
-			return await SaveInnerAsync(connection, schemaName, tableName, ds, options);
+			return await SaveInnerAsync(connection, ds, GetObjNameDictionary(ds, schemaName, tableName), options);
 		}
 
-		private async Task<int> SaveInnerAsync(SqlConnection connection, string schemaName, string tableName, DataSet ds, Options options)
+		private async Task<int> SaveInnerAsync(SqlConnection connection, DataSet ds, Dictionary<string, ObjectName> tableNames, Options options)
         {
-			if (!connection.TableExists(schemaName, tableName)) CreateTableInner(ds, connection, schemaName, tableName, options?.CustomColumns);
+			CreateTablesInner(ds, connection, tableNames, options?.CustomColumns);
 
 			int count = 0;
 			await Task.Run(() =>
 			{
-				SaveDataTable(connection, ds.Tables[0], schemaName, tableName, options);
-				count = ds.Tables[0].Rows.Count;
+				foreach (var tableName in tableNames)
+                {
+					DataTable tbl = ds.Tables[tableName.Key];
+					SaveDataTable(connection, tbl, tableNames[tbl.TableName], options);
+					count += tbl.Rows.Count;
+				}								
 			});
 			return count;
 		}
 
-		private void SaveDataTable(SqlConnection connection, DataTable table, string schemaName, string tableName, Options options)
+		private void SaveDataTable(SqlConnection connection, DataTable table, ObjectName objName, Options options)
 		{
-			if (options?.TruncateFirst ?? false) connection.Execute($"TRUNCATE TABLE [{schemaName}].[{tableName}]");
+			if (options?.TruncateFirst ?? false) connection.Execute($"TRUNCATE TABLE [{objName.Schema}].[{objName.Name}]");
 
 			// thanks to https://stackoverflow.com/a/4582786/2023653
 			foreach (DataRow row in table.Rows)
@@ -103,7 +157,7 @@ namespace Excel2SqlServer.Library
 				row.SetAdded();
 			}
 
-			using (SqlCommand select = BuildSelectCommand(table, connection, schemaName, tableName))
+			using (SqlCommand select = BuildSelectCommand(table, connection, objName.Schema, objName.Name))
 			{
 				using (var adapter = new SqlDataAdapter(select))
 				{
@@ -117,18 +171,18 @@ namespace Excel2SqlServer.Library
 
 			if ((options?.AutoTrimStrings ?? false) || (options?.RemoveNonPrintingChars ?? false))
 			{
-				var columns = GetVarcharColumns(connection, schemaName, tableName);
+				var columns = GetVarcharColumns(connection, objName.Schema, objName.Name);
 
 				if (options?.AutoTrimStrings ?? false)
 				{
-					var updateCmds = BuildTrimCommands(columns, schemaName, tableName);
+					var updateCmds = BuildTrimCommands(columns, objName.Schema, objName.Name);
 					foreach (var cmd in updateCmds) connection.Execute(cmd);
 				}
 
 				if (options?.RemoveNonPrintingChars ?? false)
 				{
 					const string nonPrintingChars = @"[^\x00-\x7F]+";
-					var dataTable = connection.QueryTable($"SELECT * FROM [{schemaName}].[{tableName}]");
+					var dataTable = connection.QueryTable($"SELECT * FROM [{objName.Schema}].[{objName.Name}]");
 					foreach (DataRow row in dataTable.Rows)
 					{
 						var expressions = new Dictionary<string, string>();						
@@ -144,7 +198,7 @@ namespace Excel2SqlServer.Library
 						if (expressions.Any())
 						{
 							connection.Execute(
-								$"UPDATE [{schemaName}].[{tableName}] SET {string.Join(", ", expressions.Select(kp => $"[{kp.Key}]='{kp.Value}'"))} WHERE [Id]=@id",
+								$"UPDATE [{objName.Schema}].[{objName.Name}] SET {string.Join(", ", expressions.Select(kp => $"[{kp.Key}]='{kp.Value}'"))} WHERE [Id]=@id",
 								new { id = row.Field<int>("Id") });
 						}
 					}
@@ -212,5 +266,21 @@ namespace Excel2SqlServer.Library
 
 			return result;
 		}
+
+		public class ObjectName
+        {
+            public ObjectName()
+            {
+            }
+
+            public ObjectName(string schema, string name)
+            {
+				Schema = schema;
+				Name = name;
+            }
+
+			public string Schema { get; set; }
+			public string Name { get; set; }
+        }
 	}
 }

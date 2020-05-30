@@ -9,6 +9,7 @@
   <ItemGroup>
     <None Remove="Resources\case01.xlsx" />
     <None Remove="Resources\case02.xlsx" />
+    <None Remove="Resources\case03.xlsx" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,6 +31,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\case01.xlsx" />
     <EmbeddedResource Include="Resources\case02.xlsx" />
+    <EmbeddedResource Include="Resources\case03.xlsx" />
   </ItemGroup>
 
 </Project>
