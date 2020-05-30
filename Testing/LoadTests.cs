@@ -27,7 +27,7 @@ namespace Testing
                 var loader = new ExcelLoader();
                 using (var stream = GetResource("case01.xlsx"))
                 {
-                    loader.Save(stream, cn, "upload", "Case01");
+                    loader.SaveAsync(stream, cn, "upload", "Case01").Wait();
                 }
             }
         }
@@ -42,12 +42,12 @@ namespace Testing
                 var loader = new ExcelLoader();
                 using (var stream = GetResource("case02.xlsx"))
                 {
-                    loader.Save(stream, cn, "upload", "Case02", new Options()
+                    loader.SaveAsync(stream, cn, "upload", "Case02", new Options()
                     {
                         TruncateFirst = true,
                         AutoTrimStrings = true,
                         RemoveNonPrintingChars = true
-                    });
+                    }).Wait();
                 }
 
                 var lastNames = cn.Query<string>("SELECT [Last Name] FROM [upload].[Case02]");

@@ -9,20 +9,21 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Excel2SqlServer.Library
 {
     public class ExcelLoader
 	{
-		public void CreateTable(string fileName, SqlConnection connection, string schemaName, string tableName, IEnumerable<string> customColumns = null)
+		public async Task CreateTableAsync(string fileName, SqlConnection connection, string schemaName, string tableName, IEnumerable<string> customColumns = null)
 		{
-			var ds = Read(fileName);
+			var ds = await ReadAsync(fileName);
 			CreateTableInner(ds, connection, schemaName, tableName, customColumns);
 		}
 
-		public void CreateTable(Stream stream, SqlConnection connection, string schemaName, string tableName, IEnumerable<string> customColumns = null)
+		public async Task CreateTableAsync(Stream stream, SqlConnection connection, string schemaName, string tableName, IEnumerable<string> customColumns = null)
 		{
-			var ds = Read(stream);
+			var ds = await ReadAsync(stream);
 			CreateTableInner(ds, connection, schemaName, tableName, customColumns);
 		}
 
@@ -66,23 +67,29 @@ namespace Excel2SqlServer.Library
 			}
 		}
 
-		public int Save(string fileName, SqlConnection connection, string schemaName, string tableName, Options options = null)
+		public async Task<int> SaveAsync(string fileName, SqlConnection connection, string schemaName, string tableName, Options options = null)
 		{
-			var ds = Read(fileName);
-			return SaveInner(connection, schemaName, tableName, ds, options);
+			var ds = await ReadAsync(fileName);
+			return await SaveInnerAsync(connection, schemaName, tableName, ds, options);
 		}
 
-		public int Save(Stream stream, SqlConnection connection, string schemaName, string tableName, Options options = null)
+		public async Task<int> SaveAsync(Stream stream, SqlConnection connection, string schemaName, string tableName, Options options = null)
 		{
-			var ds = Read(stream);
-			return SaveInner(connection, schemaName, tableName, ds, options);
+			var ds = await ReadAsync(stream);
+			return await SaveInnerAsync(connection, schemaName, tableName, ds, options);
 		}
 
-		private int SaveInner(SqlConnection connection, string schemaName, string tableName, DataSet ds, Options options)
+		private async Task<int> SaveInnerAsync(SqlConnection connection, string schemaName, string tableName, DataSet ds, Options options)
         {
 			if (!connection.TableExists(schemaName, tableName)) CreateTableInner(ds, connection, schemaName, tableName, options?.CustomColumns);
-			SaveDataTable(connection, ds.Tables[0], schemaName, tableName, options);
-			return ds.Tables[0].Rows.Count;
+
+			int count = 0;
+			await Task.Run(() =>
+			{
+				SaveDataTable(connection, ds.Tables[0], schemaName, tableName, options);
+				count = ds.Tables[0].Rows.Count;
+			});
+			return count;
 		}
 
 		private void SaveDataTable(SqlConnection connection, DataTable table, string schemaName, string tableName, Options options)
@@ -176,27 +183,34 @@ namespace Excel2SqlServer.Library
 			return new SqlCommand(query, connection);
 		}
 
-		public DataSet Read(string fileName)
+		public async Task<DataSet> ReadAsync(string fileName)
 		{
 			using (var stream = File.OpenRead(fileName))
 			{
-				return Read(stream);
+				return await ReadAsync(stream);
 			}
 		}
 
-		public DataSet Read(Stream stream)
+		public async Task<DataSet> ReadAsync(Stream stream)
 		{
-			using (var reader = ExcelReaderFactory.CreateReader(stream))
+			DataSet result = null;
+
+			await Task.Run(() =>
 			{
-				return reader.AsDataSet(new ExcelDataSetConfiguration()
+				using (var reader = ExcelReaderFactory.CreateReader(stream))
 				{
-					UseColumnDataType = true,
-					ConfigureDataTable = (r) =>
+					result = reader.AsDataSet(new ExcelDataSetConfiguration()
 					{
-						return new ExcelDataTableConfiguration() { UseHeaderRow = true };
-					}
-				});
-			}
+						UseColumnDataType = true,
+						ConfigureDataTable = (r) =>
+						{
+							return new ExcelDataTableConfiguration() { UseHeaderRow = true };
+						}
+					});
+				}
+			});
+
+			return result;
 		}
 	}
 }
