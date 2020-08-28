@@ -1,11 +1,11 @@
 using Excel2SqlServer.Library;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Postulate.SqlServer;
 using SqlServer.LocalDb;
 using SqlServer.LocalDb.Models;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
 
 namespace Testing
