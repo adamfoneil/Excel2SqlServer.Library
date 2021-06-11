@@ -130,7 +130,7 @@ namespace Testing
                     var keyedRegions = cn.Query<NameId>("SELECT [d].[Id], [r].[Name] FROM [SalesDataKeyed] [d] INNER JOIN [Region] [r] ON [r].[Id]=[d].[RegionId] ORDER BY [d].[Id]");
                     Assert.IsTrue(rawRegions.SequenceEqual(keyedRegions));
 
-                    var errors = inlineLookup.GetErrorsAsync(cn).Wait();
+                    var errors = inlineLookup.GetErrorsAsync(cn).Result;
                 }
             }
 
