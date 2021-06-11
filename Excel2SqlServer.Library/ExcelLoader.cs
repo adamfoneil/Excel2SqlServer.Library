@@ -1,4 +1,5 @@
-﻿using Dapper;
+﻿using AO.Models;
+using Dapper;
 using DataTables.Library;
 using Excel2SqlServer.Library.Extensions;
 using ExcelDataReader;
@@ -265,22 +266,6 @@ namespace Excel2SqlServer.Library
             });
 
             return result;
-        }
-
-        public class ObjectName
-        {
-            public ObjectName()
-            {
-            }
-
-            public ObjectName(string schema, string name)
-            {
-                Schema = schema;
-                Name = name;
-            }
-
-            public string Schema { get; set; }
-            public string Name { get; set; }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Dapper;
+﻿using AO.Models;
+using Dapper;
 using Excel2SqlServer.Library;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -85,10 +86,10 @@ namespace Testing
 
                 using (var stream = GetResource("case03.xlsx"))
                 {
-                    new ExcelLoader().SaveAsync(stream, cn, new Dictionary<string, ExcelLoader.ObjectName>()
+                    new ExcelLoader().SaveAsync(stream, cn, new Dictionary<string, ObjectName>()
                     {
-                        { "Companies", new ExcelLoader.ObjectName("loader", "Company") },
-                        { "People", new ExcelLoader.ObjectName("loader", "Person") }
+                        { "Companies", new ObjectName("loader", "Company") },
+                        { "People", new ObjectName("loader", "Person") }
                     }).Wait();
 
                     Assert.IsTrue(cn.Query<int>("SELECT COUNT(1) FROM [loader].[Company]").Count() > 0);

@@ -15,8 +15,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AO.Models" Version="1.1.38" />
     <PackageReference Include="Dapper" Version="2.0.35" />
-    <PackageReference Include="DataTables.Library" Version="2.0.2" />
+    <PackageReference Include="DataTables.Library" Version="2.0.13" />
     <PackageReference Include="ExcelDataReader" Version="3.6.0" />
     <PackageReference Include="ExcelDataReader.DataSet" Version="3.6.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.0.1" />
