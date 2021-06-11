@@ -10,6 +10,7 @@
     <None Remove="Resources\case01.xlsx" />
     <None Remove="Resources\case02.xlsx" />
     <None Remove="Resources\case03.xlsx" />
+    <None Remove="Resources\inline-lookup.xlsx" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,6 +34,7 @@
     <EmbeddedResource Include="Resources\case01.xlsx" />
     <EmbeddedResource Include="Resources\case02.xlsx" />
     <EmbeddedResource Include="Resources\case03.xlsx" />
+    <EmbeddedResource Include="Resources\inline-lookup.xlsx" />
   </ItemGroup>
 
 </Project>

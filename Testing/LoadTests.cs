@@ -4,8 +4,11 @@ using Excel2SqlServer.Library;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SqlServer.LocalDb;
+using SqlServer.LocalDb.Models;
+using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -98,6 +101,58 @@ namespace Testing
             }
         }
 
+        [TestMethod]
+        public void InlineLookup()
+        {
+            using (var cn = LocalDb.GetConnection(dbName, SampleLookupObjects()))
+            {
+                CreateRows(cn, "dbo.Region", "North", "South", "East", "West");
+                CreateRows(cn, "dbo.Type", "Flavorful", "Oblong", "Interminable", "Gingersnap");
+
+                var loader = new ExcelLoader();
+                using (var xls = GetResource("inline-lookup.xlsx"))
+                {
+                    loader.SaveAsync(xls, cn, "dbo", "SalesDataRaw", new Options()
+                    {
+                        TruncateFirst = true
+                    }).Wait();
+
+                    var inlineLookup = new InlineLookup<int>("dbo.SalesDataRaw", "Id", "dbo.SalesDataKeyed", new Lookup[]
+                    {
+                        new Lookup("Region", "RegionId", "dbo.Region", "Name", "Id"),
+                        new Lookup("Type", "TypeId", "dbo.Type", "Name", "Id")
+                    });
+
+                    inlineLookup.ExecuteAsync(cn).Wait();
+
+                    // regions should be the same 
+                    var rawRegions = cn.Query<NameId>("SELECT [Id], [Region] AS [Name] FROM [SalesDataRaw] ORDER BY [Id]");
+                    var keyedRegions = cn.Query<NameId>("SELECT [d].[Id], [r].[Name] FROM [SalesDataKeyed] [d] INNER JOIN [Region] [r] ON [r].[Id]=[d].[RegionId] ORDER BY [d].[Id]");
+                    Assert.IsTrue(rawRegions.SequenceEqual(keyedRegions));
+
+                    var errors = inlineLookup.GetErrorsAsync(cn).Wait();
+                }
+            }
+
+            void CreateRows(SqlConnection cn, string tableName, params string[] names)
+            {
+                names.ToList().ForEach(name => cn.Execute($"INSERT INTO {tableName} ([Name]) VALUES (@name)", new { name }));
+            }
+        }
+
+        private IEnumerable<InitializeStatement> SampleLookupObjects()
+        {
+            yield return new InitializeStatement("dbo.Region", "DROP TABLE %obj%", @"CREATE TABLE %obj% (
+                [Id] int identity(1,1) PRIMARY KEY,
+                [Name] nvarchar(50) NOT NULL
+            )");
+
+            yield return new InitializeStatement("dbo.Type", "DROP TABLE %obj%", @"CREATE TABLE %obj% (
+                [Id] int identity(1,1) PRIMARY KEY,
+                [Name] nvarchar(50) NOT NULL
+            )");
+        }
+
         private static void ExecuteIgnoreError(IDbConnection connection, string command)
         {
             try
@@ -120,6 +175,14 @@ namespace Testing
             //var names = Assembly.GetExecutingAssembly().GetManifestResourceNames();
 
             return Assembly.GetExecutingAssembly().GetManifestResourceStream($"Testing.Resources.{resourceName}");
+        }
+
+        private class NameId : IEquatable<NameId>
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+
+            public bool Equals([AllowNull] NameId other) => Id.Equals(other.Id) && Name.Equals(other.Name);            
         }
     }
 }

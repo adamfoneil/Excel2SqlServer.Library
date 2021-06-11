@@ -33,14 +33,11 @@ namespace Excel2SqlServer.Library
         {
             await RebuildResultTableAsync(connection);
 
-            var sourceObj = ObjectName.FromName(SourceTable);
-            var table = await connection.QueryTableAsync($"SELECT * FROM [{sourceObj.Schema}].[{sourceObj.Name}]");
-
-            // create a bunch of blank rows in the result table.
+            // create blank rows in the result table for each source row.
             // this is what we'll update with key values next
+            var sourceObj = ObjectName.FromName(SourceTable);
             var resultObj = ObjectName.FromName(ResultTable);
-
-            var columnNames = string.Join(", ", Lookups.Select(kp => $"[{kp.Key}]"));
+            var columnNames = string.Join(", ", Lookups.Select(kp => $"[{kp.Value.ResultColumn}]"));
             var defaultValues = string.Join(", ", Lookups.Select(kp => "NULL"));
             await connection.ExecuteAsync(
                 $@"INSERT INTO [{resultObj.Schema}].[{resultObj.Name}] ([{IdentityColumn}], {columnNames})
@@ -54,7 +51,7 @@ namespace Excel2SqlServer.Library
                 var lookupObj = ObjectName.FromName(col.Value.LookupTable);
                 var sqlUpdate =
                     $@"UPDATE [result] SET 
-                        [{col.Value.ResultColumn}]=[src].[{col.Value.LookupIdentityColumn}]
+                        [{col.Value.ResultColumn}]=[lookup].[{col.Value.LookupIdentityColumn}]
                     FROM 
                         [{sourceObj.Schema}].[{sourceObj.Name}] [src]
                         INNER JOIN [{resultObj.Schema}].[{resultObj.Name}] [result] ON [src].[{IdentityColumn}]=[result].[{IdentityColumn}]
@@ -88,55 +85,63 @@ namespace Excel2SqlServer.Library
             columns.Add($"[{IdentityColumn}] int NOT NULL PRIMARY KEY");
 
             // now add the lookup columns -- this is where the key lookup results are stored
-            columns.AddRange(Lookups.Select(kp => $"[{kp.Key}] {ColumnSqlTypeSyntax} NULL"));
+            columns.AddRange(Lookups.Select(kp => $"[{kp.Value.ResultColumn}] {ColumnSqlTypeSyntax} NULL"));
 
             sql += string.Join("\r\n\t, ", columns) + "\r\n)";
 
             await connection.ExecuteAsync(sql);
         }
 
-        public class Lookup
+        /// <summary>
+        /// finds source values that don't have a mapping
+        /// </summary>
+        public async Task<ILookup<string, string>> GetErrorsAsync(SqlConnection cn)
         {
-            public Lookup()
-            {
-            }
-
-            public Lookup(string sourceColumn, string resultColumn, string lookupTable, string lookupNameColumn, string lookupIdentityColumn)
-            {
-                SourceColumn = sourceColumn;
-                ResultColumn = resultColumn;
-                LookupTable = lookupTable;
-                LookupNameColumn = lookupNameColumn;
-                LookupIdentityColumn = lookupIdentityColumn;
-            }
-
-            /// <summary>
-            /// string column in the source table being converted to T
-            /// For example RegionName
-            /// </summary>
-            public string SourceColumn { get; set; }
-
-            /// <summary>
-            /// T column being converted into (in the ResultTable), typically a numeric key value column
-            /// For example RegionId
-            /// </summary>
-            public string ResultColumn { get; set; }
-
-            /// <summary>
-            /// what table are we joining to to get a key value
-            /// </summary>
-            public string LookupTable { get; set; }
-
-            /// <summary>
-            /// What column do we join to in the lookup table to get the identity value
-            /// </summary>
-            public string LookupNameColumn { get; set; }
-
-            /// <summary>
-            /// what column are we returning from the lookup table?
-            /// This is what we're ultimately trying to find
-            /// </summary>
-            public string LookupIdentityColumn { get; set; }
+            throw new NotImplementedException();
         }
+    }
+
+    public class Lookup
+    {
+        public Lookup()
+        {
+        }
+
+        public Lookup(string sourceColumn, string resultColumn, string lookupTable, string lookupNameColumn, string lookupIdentityColumn)
+        {
+            SourceColumn = sourceColumn;
+            ResultColumn = resultColumn;
+            LookupTable = lookupTable;
+            LookupNameColumn = lookupNameColumn;
+            LookupIdentityColumn = lookupIdentityColumn;
+        }
+
+        /// <summary>
+        /// string column in the source table being converted to T
+        /// For example RegionName
+        /// </summary>
+        public string SourceColumn { get; set; }
+
+        /// <summary>
+        /// T column being converted into (in the ResultTable), typically a numeric key value column
+        /// For example RegionId
+        /// </summary>
+        public string ResultColumn { get; set; }
+
+        /// <summary>
+        /// what table are we joining to to get a key value
+        /// </summary>
+        public string LookupTable { get; set; }
+
+        /// <summary>
+        /// What column do we join to in the lookup table to get the identity value
+        /// </summary>
+        public string LookupNameColumn { get; set; }
+
+        /// <summary>
+        /// what column are we returning from the lookup table?
+        /// This is what we're ultimately trying to find
+        /// </summary>
+        public string LookupIdentityColumn { get; set; }
     }
 }
