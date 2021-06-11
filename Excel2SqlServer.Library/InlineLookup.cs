@@ -97,6 +97,19 @@ namespace Excel2SqlServer.Library
 
         public class Lookup
         {
+            public Lookup()
+            {
+            }
+
+            public Lookup(string sourceColumn, string resultColumn, string lookupTable, string lookupNameColumn, string lookupIdentityColumn)
+            {
+                SourceColumn = sourceColumn;
+                ResultColumn = resultColumn;
+                LookupTable = lookupTable;
+                LookupNameColumn = lookupNameColumn;
+                LookupIdentityColumn = lookupIdentityColumn;
+            }
+
             /// <summary>
             /// string column in the source table being converted to T
             /// For example RegionName
