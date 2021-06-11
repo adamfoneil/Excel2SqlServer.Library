@@ -47,6 +47,8 @@ namespace Excel2SqlServer.Library
                 SELECT [{IdentityColumn}], {defaultValues}
                 FROM [{sourceObj.Schema}].[{sourceObj.Name}]");
             
+            // attempt to match text values in the source table with named values in the corresponding lookup table.
+            // if no match, we simply get nulls in the corresponding output col
             foreach (var col in Lookups)
             {
                 var lookupObj = ObjectName.FromName(col.Value.LookupTable);
