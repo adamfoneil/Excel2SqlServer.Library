@@ -125,12 +125,15 @@ namespace Testing
 
                     inlineLookup.ExecuteAsync(cn).Wait();
 
-                    // regions should be the same 
+                    // region Name + Id combos should be the same 
                     var rawRegions = cn.Query<NameId>("SELECT [Id], [Region] AS [Name] FROM [SalesDataRaw] ORDER BY [Id]");
                     var keyedRegions = cn.Query<NameId>("SELECT [d].[Id], [r].[Name] FROM [SalesDataKeyed] [d] INNER JOIN [Region] [r] ON [r].[Id]=[d].[RegionId] ORDER BY [d].[Id]");
                     Assert.IsTrue(rawRegions.SequenceEqual(keyedRegions));
 
+                    // but there is deliberately one error where Type = Unknown
                     var errors = inlineLookup.GetErrorsAsync(cn).Result;
+                    Assert.IsTrue(errors.Count == 1);
+                    Assert.IsTrue(errors["Type"].SequenceEqual(new string[] { "Unknown" }));
                 }
             }
 

@@ -1,6 +1,5 @@
 ﻿using AO.Models;
 using Dapper;
-using DataTables.Library;
 using Excel2SqlServer.Library.Extensions;
 using Microsoft.Data.SqlClient;
 using System;
@@ -93,12 +92,34 @@ namespace Excel2SqlServer.Library
         }
 
         /// <summary>
-        /// finds source values that don't have a mapping
+        /// finds source values that don't have a mapping, grouped by column.
+        /// Helps users know what they need to fix in their spreadsheet if the enter a value that doesn't exist
         /// </summary>
         public async Task<ILookup<string, string>> GetErrorsAsync(SqlConnection cn)
         {
-            throw new NotImplementedException();
-        }
+            List<KeyValuePair<string, string>> results = new List<KeyValuePair<string, string>>();
+
+            var sourceObj = ObjectName.FromName(SourceTable);
+            
+            foreach (var col in Lookups)
+            {
+                var lookupObj = ObjectName.FromName(col.Value.LookupTable);
+
+                var errors = await cn.QueryAsync<KeyValuePair<string, string>>(
+                    $@"WITH [source] AS (
+	                    SELECT [{col.Key}] FROM [{sourceObj.Schema}].[{sourceObj.Name}] GROUP BY [{col.Key}]
+                    ) SELECT
+	                    '{col.Key}' AS [Key], [{col.Key}] AS [Value]
+                    FROM
+	                    [source] [src]
+                    WHERE
+	                    NOT EXISTS(SELECT 1 FROM [{lookupObj.Schema}].[{lookupObj.Name}] WHERE [{col.Value.LookupNameColumn}]=[src].[{col.Key}]);");
+
+                results.AddRange(errors);
+            }
+
+            return results.ToLookup(row => row.Key, row => row.Value);
+        }        
     }
 
     public class Lookup
