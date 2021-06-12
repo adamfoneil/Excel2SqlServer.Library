@@ -73,7 +73,7 @@ Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
  (Stream stream)
 
 ## Inline Lookup Feature
-Use the [InlineLookup](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/InlineLookup.cs) class to convert string values to corresponding key values. For users who need to upload spreadsheets with key values, allowing them to use text values instead of numeric keys can make an upload process easier.
+Use the [InlineLookup\<T\>](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/InlineLookup.cs) class to convert string values to corresponding key values. The `T` generic argument indicates the type of keys being used. Currently `int` is the only type supported. For users who need to upload spreadsheets with key values, allowing them to use text values instead of numeric keys can make an upload process easier.
 
 - See the integration [test](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Testing/LoadTests.cs#L105) showing this in use along with the sample [Excel file](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Testing/Resources/inline-lookup.xlsx) it uses.
     
