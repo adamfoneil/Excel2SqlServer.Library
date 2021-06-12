@@ -73,7 +73,10 @@ Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
  (Stream stream)
 
 ## Inline Lookup Feature
-Use the [InlineLookup](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/InlineLookup.cs) class to convert string values to corresponding key values. For users who need to upload spreadsheets with key values, allowing them to use text values instead of numeric keys can make an upload process easier.    
-    - See the integration [test](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Testing/LoadTests.cs#L105) showing this in use along with the sample [Excel file](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Testing/Resources/inline-lookup.xlsx) it uses.
-    - Use the [InlineLookup.ExecuteAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/InlineLookup.cs#L31) method to generate a table of mapped key values from a user's upload.
-    - Use the [InlineLookup.GetErrorsAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/InlineLookup.cs#L98) method to find text values that don't have a mapping.
+Use the [InlineLookup](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/InlineLookup.cs) class to convert string values to corresponding key values. For users who need to upload spreadsheets with key values, allowing them to use text values instead of numeric keys can make an upload process easier.
+
+- See the integration [test](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Testing/LoadTests.cs#L105) showing this in use along with the sample [Excel file](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Testing/Resources/inline-lookup.xlsx) it uses.
+    
+- Use the [InlineLookup.ExecuteAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/InlineLookup.cs#L31) method to generate a table of mapped key values from a user's upload.
+    
+- Use the [InlineLookup.GetErrorsAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/InlineLookup.cs#L98) method to find text values that don't have a mapping.
