@@ -54,23 +54,23 @@ Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 ```
 
 ## Reference
-
-- Task [CreateTableAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L18)
+- Task [CreateTableAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L19)
  (string fileName, SqlConnection connection, string schemaName, string tableName, [ IEnumerable<string> customColumns ])
-- Task [CreateTableAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L24)
+- Task [CreateTableAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L25)
  (Stream stream, SqlConnection connection, string schemaName, string tableName, [ IEnumerable<string> customColumns ])
-- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L108)
+- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L109)
  (string fileName, SqlConnection connection, [ Dictionary<string, ObjectName> tableNames ], [ [Options](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs#L5) options ])
-- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L114)
+- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L115)
  (string fileName, SqlConnection connection, string schemaName, string tableName, [ [Options](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs#L5) options ])
-- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L120)
+- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L121)
  (Stream stream, SqlConnection connection, [ Dictionary<string, ObjectName> tableNames ], [ [Options](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs#L5) options ])
-- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L126)
+- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L127)
  (Stream stream, SqlConnection connection, string schemaName, string tableName, [ [Options](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs#L5) options ])
-- Task\<DataSet\> [ReadAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L240)
+- Task\<DataSet\> [ReadAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L241)
  (string fileName)
-- Task\<DataSet\> [ReadAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L248)
+- Task\<DataSet\> [ReadAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L249)
  (Stream stream)
+
 
 ## Inline Lookup Feature
 Use the [InlineLookup\<T\>](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/InlineLookup.cs) class to convert string values to corresponding key values. The `T` generic argument indicates the type of keys being used. Currently `int` is the only type supported. For users who need to upload spreadsheets with key values, allowing them to use text values instead of numeric keys can make an upload process easier.
