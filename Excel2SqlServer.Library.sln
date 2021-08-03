@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.29519.87
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Excel2SqlServer.Library", "Excel2SqlServer.Library\Excel2SqlServer.Library.csproj", "{C110E3C3-254A-4EFB-84AD-082C25248D87}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing", "Testing\Testing.csproj", "{A0101EBC-C08A-44FE-93AE-B12D51B19CDC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Testing", "Testing\Testing.csproj", "{A0101EBC-C08A-44FE-93AE-B12D51B19CDC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Excel2SqlServer.Download", "Excel2SqlServer.Download\Excel2SqlServer.Download.csproj", "{704F4BEA-7BCC-47E3-B9AA-7FAEA835BCFF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{A0101EBC-C08A-44FE-93AE-B12D51B19CDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A0101EBC-C08A-44FE-93AE-B12D51B19CDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A0101EBC-C08A-44FE-93AE-B12D51B19CDC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{704F4BEA-7BCC-47E3-B9AA-7FAEA835BCFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{704F4BEA-7BCC-47E3-B9AA-7FAEA835BCFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{704F4BEA-7BCC-47E3-B9AA-7FAEA835BCFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{704F4BEA-7BCC-47E3-B9AA-7FAEA835BCFF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
