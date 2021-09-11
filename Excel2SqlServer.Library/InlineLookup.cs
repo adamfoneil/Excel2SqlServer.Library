@@ -93,7 +93,7 @@ namespace Excel2SqlServer.Library
 
         /// <summary>
         /// finds source values that don't have a mapping, grouped by column.
-        /// Helps users know what they need to fix in their spreadsheet if the enter a value that doesn't exist
+        /// Helps users know what they need to fix in their spreadsheet if they enter a value that doesn't exist
         /// </summary>
         public async Task<ILookup<string, string>> GetErrorsAsync(SqlConnection cn)
         {
