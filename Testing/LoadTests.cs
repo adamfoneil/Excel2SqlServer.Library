@@ -155,9 +155,9 @@ namespace Testing
                 using (var stream = GetResource("zipcode_us_geo_db.xlsx"))
                 {
                     var loader = new ExcelLoader();
-                    var result = await loader.BulkSaveAsync(stream, cn, "dbo", "ZipCodes");
+                    var result = await loader.BulkSaveAsync(stream, cn, "dbo", "ZipCodes", 1000);
 
-                    Assert.IsTrue(result > 80_237);
+                    Assert.IsTrue(result == 80_237);
                 }
             }
         }
