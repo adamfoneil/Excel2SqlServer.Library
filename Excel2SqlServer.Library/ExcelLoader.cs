@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Excel2SqlServer.Library
 {
-    public class ExcelLoader
+    public partial class ExcelLoader
     {
         public async Task CreateTableAsync(string fileName, SqlConnection connection, string schemaName, string tableName, IEnumerable<string> customColumns = null)
         {

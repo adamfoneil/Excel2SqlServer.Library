@@ -11,6 +11,7 @@
     <None Remove="Resources\case02.xlsx" />
     <None Remove="Resources\case03.xlsx" />
     <None Remove="Resources\inline-lookup.xlsx" />
+    <None Remove="Resources\zipcode_us_geo_db.xlsx" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,7 +24,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="SqlServer.LocalDb.Testing" Version="1.0.13" />
+    <PackageReference Include="SqlServer.LocalDb.Testing" Version="1.0.14" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,6 +36,7 @@
     <EmbeddedResource Include="Resources\case02.xlsx" />
     <EmbeddedResource Include="Resources\case03.xlsx" />
     <EmbeddedResource Include="Resources\inline-lookup.xlsx" />
+    <EmbeddedResource Include="Resources\zipcode_us_geo_db.xlsx" />
   </ItemGroup>
 
 </Project>

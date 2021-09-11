@@ -4,6 +4,7 @@ using Excel2SqlServer.Library;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SqlServer.LocalDb;
+using SqlServer.LocalDb.Extensions;
 using SqlServer.LocalDb.Models;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Testing
 {
@@ -140,6 +142,23 @@ namespace Testing
             void CreateRows(SqlConnection cn, string tableName, params string[] names)
             {
                 names.ToList().ForEach(name => cn.Execute($"INSERT INTO {tableName} ([Name]) VALUES (@name)", new { name }));
+            }
+        }
+
+        [TestMethod]
+        public async Task BulkCopy()
+        {
+            using (var cn = LocalDb.GetConnection(dbName))
+            {
+                await cn.DropAllTablesAsync();
+
+                using (var stream = GetResource("zipcode_us_geo_db.xlsx"))
+                {
+                    var loader = new ExcelLoader();
+                    var result = await loader.BulkSaveAsync(stream, cn, "dbo", "ZipCodes");
+
+                    Assert.IsTrue(result > 80_237);
+                }
             }
         }
 
