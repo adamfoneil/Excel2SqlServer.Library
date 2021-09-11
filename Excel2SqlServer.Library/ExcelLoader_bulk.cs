@@ -9,27 +9,31 @@ namespace Excel2SqlServer.Library
 {
     public partial class ExcelLoader
     {
-        public async Task<int> BulkSaveAsync(Stream stream, SqlConnection connection, string schemaName, string tableName)
+        public async Task<int> BulkSaveAsync(Stream stream, SqlConnection connection, string schemaName, string tableName, int batchSize = 0)
         {
             var ds = await ReadAsync(stream);
-            return await BulkSaveInnerAsync(ds, connection, schemaName, tableName);
+            return await BulkSaveInnerAsync(ds, connection, schemaName, tableName, batchSize);
         }
 
-        public async Task<int> BulkSaveAsync(string fileName, SqlConnection connection, string schemaName, string tableName)
+        public async Task<int> BulkSaveAsync(string fileName, SqlConnection connection, string schemaName, string tableName, int batchSize = 0)
         {
             var ds = await ReadAsync(fileName);
-            return await BulkSaveInnerAsync(ds, connection, schemaName, tableName);
+            return await BulkSaveInnerAsync(ds, connection, schemaName, tableName, batchSize);
         }
 
-        private async Task<int> BulkSaveInnerAsync(DataSet ds, SqlConnection connection, string schemaName, string tableName)
+        private async Task<int> BulkSaveInnerAsync(DataSet ds, SqlConnection connection, string schemaName, string tableName, int batchSize)
         {
             CreateTablesInner(ds, connection, new Dictionary<string, ObjectName>()
             {
                 [ds.Tables[0].TableName] = new ObjectName(schemaName, tableName)
             }, null);
 
+            if (connection.State == ConnectionState.Closed) connection.Open();
+
             using (var bcp = new SqlBulkCopy(connection))
             {
+                bcp.BatchSize = batchSize;
+
                 var table = ds.Tables[0];
                 foreach (DataColumn col in table.Columns) bcp.ColumnMappings.Add(col.ColumnName, col.ColumnName);
 
