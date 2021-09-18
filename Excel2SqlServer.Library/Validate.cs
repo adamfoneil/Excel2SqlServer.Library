@@ -116,6 +116,7 @@ namespace Excel2SqlServer.Library
                 {
                     if (!columnMappings.ContainsKey(kp.Key)) return false;
                     var sourceCol = columnMappings[kp.Key];
+                    if (!columnSizes.ContainsKey(sourceCol)) return false;
                     return kp.Value.length > columnSizes[sourceCol];
                 })
                 .ToDictionary(kp => kp.Key, kp => (kp.Value.value, kp.Value.length, columnSizes[columnMappings[kp.Key]]));
