@@ -154,7 +154,7 @@ namespace Excel2SqlServer.Library
                 )
 
                 INSERT INTO @sizers ([Name], [Divisor]) 
-                VALUES ('varchar', 1), ('nvarchar', 2), ('varbinary', 1)
+                VALUES ('varchar', 1), ('nvarchar', 2), ('varbinary', 1), ('char', 1), ('nchar', 2)
 
                 SELECT
                     [col].[name] AS [ColumnName],
