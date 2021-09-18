@@ -26,7 +26,7 @@ namespace Excel2SqlServer.Library.Extensions
 
         public static async Task<IEnumerable<string>> GetColumnNamesAsync(this SqlConnection connection, ObjectName table) =>
             await connection.QueryAsync<string>(
-                @"SELECT [col].[name] FROM [sys].[columns] WHERE [object_id]=OBJECT_ID(@objectName)",
+                @"SELECT [col].[name] FROM [sys].[columns] [col] WHERE [object_id]=OBJECT_ID(@objectName)",
                 new { objectName = table.ToString() });
     }
 }

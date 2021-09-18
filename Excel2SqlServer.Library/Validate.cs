@@ -98,37 +98,39 @@ namespace Excel2SqlServer.Library
         /// gets columns in a source table with data that's too long for mapped destination columns.
         /// columnMappings argument is source column to destination
         /// </summary>
-        public static async Task<Dictionary<string, (int data, int allowed)>> GetOversizedDataAsync(
+        public static async Task<Dictionary<string, (string value, int data, int allowed)>> GetOversizedDataAsync(
             SqlConnection connection, ObjectName source, ObjectName destination, Dictionary<string, string> columnMappings)
         {                                    
-            Dictionary<string, int> maxLengths = await GetMaxDataLengthsAsync(connection, source);
+            Dictionary<string, (string, int)> maxLengths = await GetMaxDataLengthsAsync(connection, source);
 
             return await GetOversizedDataAsync(connection, maxLengths, destination, columnMappings);
         }
         
-        public static async Task<Dictionary<string, (int data, int allowed)>> GetOversizedDataAsync(
-            SqlConnection connection, Dictionary<string, int> maxDataLengths, ObjectName destination, Dictionary<string, string> columnMappings)
+        public static async Task<Dictionary<string, (string value, int length, int allowed)>> GetOversizedDataAsync(
+            SqlConnection connection, Dictionary<string, (string value, int length)> maxDataLengths, ObjectName destination, Dictionary<string, string> columnMappings)
         {
             Dictionary<string, int> columnSizes = await GetColumnSizesAsync(connection, destination);
 
-            // we need to know the source columns that are too long, so we reverse the column mappings
-            var sourceMappings = columnMappings.ToDictionary(kp => kp.Value, kp => kp.Key);
-
             return maxDataLengths
-                .Where(kp => kp.Value > columnSizes[kp.Key])
-                .ToDictionary(kp => sourceMappings[kp.Key], kp => (kp.Value, columnSizes[kp.Key]));
+                .Where(kp => 
+                {
+                    if (!columnMappings.ContainsKey(kp.Key)) return false;
+                    var sourceCol = columnMappings[kp.Key];
+                    return kp.Value.length > columnSizes[sourceCol];
+                })
+                .ToDictionary(kp => kp.Key, kp => (kp.Value.value, kp.Value.length, columnSizes[columnMappings[kp.Key]]));
         }
 
         public static async Task EnsureNoOversizedDataAsync(
             SqlConnection connection, ObjectName source, ObjectName destination, Dictionary<string, string> columnMappings)
         {
-            Dictionary<string, int> maxLengths = await GetMaxDataLengthsAsync(connection, source);
+            Dictionary<string, (string value, int length)> maxLengths = await GetMaxDataLengthsAsync(connection, source);
 
             await EnsureNoOversizedDataAsync(connection, maxLengths, destination, columnMappings);
         }
 
         public static async Task EnsureNoOversizedDataAsync(
-            SqlConnection connection, Dictionary<string, int> maxDataLengths, ObjectName destination, Dictionary<string, string> columnMappings)
+            SqlConnection connection, Dictionary<string, (string value, int length)> maxDataLengths, ObjectName destination, Dictionary<string, string> columnMappings)
         {
             var oversized = await GetOversizedDataAsync(connection, maxDataLengths, destination, columnMappings);
 
@@ -136,7 +138,7 @@ namespace Excel2SqlServer.Library
 
             if (oversized.Any())
             {
-                var message = string.Join("\r\n", oversized.Select(kp => $"Data with length {kp.Value.data} in {sourceMappings[kp.Key]} column can't insert into {destination.Schema}.{destination.Name}.{columnMappings[kp.Key]} with max length {kp.Value.allowed}"));
+                var message = string.Join("\r\n", oversized.Select(kp => $"Data value '{kp.Value.value}' with length {kp.Value.length} in {sourceMappings[columnMappings[kp.Key]]} column can't insert into {destination.Schema}.{destination.Name}.{columnMappings[kp.Key]} due to max length {kp.Value.allowed}"));
                 var exc = new Exception(message);
                 foreach (var kp in oversized) exc.Data.Add(kp.Key, kp.Value);
                 throw exc;
@@ -170,19 +172,32 @@ namespace Excel2SqlServer.Library
             return data.ToDictionary(row => row.ColumnName, row => row.MaxSize);
         }
 
-        public static async Task<Dictionary<string, int>> GetMaxDataLengthsAsync(SqlConnection connection, ObjectName table)
+        public static async Task<Dictionary<string, (string value, int length)>> GetMaxDataLengthsAsync(SqlConnection connection, ObjectName table)
         {
             var columnNames = await connection.GetColumnNamesAsync(table);
 
-            var results = new Dictionary<string, int>();
+            var results = new Dictionary<string, (string, int)>();
 
             foreach (var col in columnNames)
             {
-                int dataLength = await connection.QuerySingleOrDefaultAsync<int>($"SELECT MAX(LEN([{col}])) FROM [{table.Schema}].[{table.Name}]");
-                results.Add(col, dataLength);
+                var dataLength = await connection.QuerySingleOrDefaultAsync<MaxLengthData>(
+                    $@"WITH [max_len] AS (
+                        SELECT MAX(LEN([{col}])) AS [Length] FROM [{table.Schema}].[{table.Name}]
+                    ) SELECT TOP (1)
+                        [src].[{col}] AS [Value], [ml].[Length]
+                    FROM
+                        [{table.Schema}].[{table.Name}] [src]
+                        INNER JOIN [max_len] [ml] ON [ml].[Length]=LEN([src].[{col}])");
+                results.Add(col, (dataLength.Value, dataLength.Length));
             }
 
             return results;
+        }
+
+        private class MaxLengthData
+        {
+            public string Value { get; set; }
+            public int Length { get; set; }
         }
 
         public class ColumnSizeInfoResult
