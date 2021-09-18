@@ -188,7 +188,11 @@ namespace Excel2SqlServer.Library
                     FROM
                         [{table.Schema}].[{table.Name}] [src]
                         INNER JOIN [max_len] [ml] ON [ml].[Length]=LEN([src].[{col}])");
-                results.Add(col, (dataLength.Value, dataLength.Length));
+
+                if (dataLength != null)
+                {
+                    results.Add(col, (dataLength.Value, dataLength.Length));
+                }                
             }
 
             return results;
