@@ -80,3 +80,22 @@ Use the [InlineLookup\<T\>](https://github.com/adamfoneil/Excel2SqlServer.Librar
 - Use the [InlineLookup.ExecuteAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/InlineLookup.cs#L31) method to generate a table of mapped key values from a user's upload.
     
 - Use the [InlineLookup.GetErrorsAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/InlineLookup.cs#L98) method to find text values that don't have a mapping.
+    
+### Validation Features
+Use the [Validate](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Validate.cs) static class to use these methods to help with data validation:
+- IEnumerable\<ValidationInfo\> [ColumnTypes](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Validate.cs#L19)
+ (SqlConnection connection, string query, string reportColumn, params TypeValidator[] columns)
+- IEnumerable\<ValidationInfo\> [ColumnTypes](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Validate.cs#L33)
+ (DataTable dataTable, string reportColumn, params TypeValidator[] columns)
+- Task\<IEnumerable\<ValidationInfo\>\> [SqlServerTypeConversionAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Validate.cs#L53)
+ (SqlConnection connection, string schema, string table, string keyColumn, string convertColumn, string convertType, [ string criteria ])
+- Task\<Dictionary\<string, (string value, int data, int allowed)\>\> [GetOversizedDataAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Validate.cs#L101)
+ (SqlConnection connection, ObjectName source, ObjectName destination, Dictionary<string, string> columnMappings)
+- Task\<Dictionary\<string, (string value, int length, int allowed)\>\> [GetOversizedDataAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Validate.cs#L109)
+ (SqlConnection connection, Dictionary<string, (string value, int length)> maxDataLengths, ObjectName destination, Dictionary<string, string> columnMappings)
+- Task [EnsureNoOversizedDataAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Validate.cs#L124)
+ (SqlConnection connection, ObjectName source, ObjectName destination, Dictionary<string, string> columnMappings)
+- Task [EnsureNoOversizedDataAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Validate.cs#L132)
+ (SqlConnection connection, Dictionary<string, (string value, int length)> maxDataLengths, ObjectName destination, Dictionary<string, string> columnMappings)
+- Task\<Dictionary\<string, (string value, int length)\>\> [GetMaxDataLengthsAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Validate.cs#L175)
+ (SqlConnection connection, ObjectName table)
