@@ -162,6 +162,44 @@ namespace Testing
             }
         }
 
+        [TestMethod]
+        public async Task DataLengthValidation()
+        {
+            using (var cn = LocalDb.GetConnection(dbName, new[]
+            {
+                new InitializeStatement("dbo.MaxLength", "DROP TABLE %obj%",
+                    @"CREATE TABLE %obj% (
+                        [Id] int identity(1,1) PRIMARY KEY,
+                        [Name] nvarchar(10) NOT NULL,
+                        [Description] nvarchar(max) NULL
+                    )")
+            }))
+            {
+                try { await cn.ExecuteAsync("DROP TABLE [upload].[LengthValidation]"); } catch { /* do nothing*/ }
+
+                using (var stream = GetResource("length-validation.xlsx"))
+                {
+                    var loader = new ExcelLoader();
+                    var result = await loader.SaveAsync(stream, cn, "upload", "LengthValidation");
+
+                    try
+                    {
+                        await Validate.EnsureNoOversizedDataAsync(cn, 
+                            new ObjectName("upload", "LengthValidation"), 
+                            new ObjectName("dbo", "MaxLength"), 
+                            new Dictionary<string, string>()
+                            {
+                                ["Entry"] = "Name"
+                            });
+                    }
+                    catch (Exception exc)
+                    {
+                        Assert.IsTrue(exc.Message.Equals("Data value 'way too long for the field we need to insert' with length 44 in Entry column can't insert into dbo.MaxLength.Name due to max length 10"));
+                    }
+                }
+            }
+        }
+
         private IEnumerable<InitializeStatement> SampleLookupObjects()
         {
             yield return new InitializeStatement("dbo.Region", "DROP TABLE %obj%", @"CREATE TABLE %obj% (
@@ -172,7 +210,7 @@ namespace Testing
             yield return new InitializeStatement("dbo.Type", "DROP TABLE %obj%", @"CREATE TABLE %obj% (
                 [Id] int identity(1,1) PRIMARY KEY,
                 [Name] nvarchar(50) NOT NULL
-            )");
+            )");            
         }
 
         private static void ExecuteIgnoreError(IDbConnection connection, string command)
