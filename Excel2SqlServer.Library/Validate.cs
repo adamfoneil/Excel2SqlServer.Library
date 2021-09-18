@@ -1,19 +1,22 @@
-﻿using Dapper;
+﻿using AO.Models;
+using Dapper;
+using Excel2SqlServer.Library.Extensions;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Excel2SqlServer.Library
 {
-    public static class Validation
+    public static class Validate
     {
         /// <summary>
         /// Loops through records in a query and attempts conversions to specified types for the specified columns,
         /// and returns info about conversion failures
         /// </summary>
-        public static IEnumerable<ValidationInfo> ValidateColumnTypes(
+        public static IEnumerable<ValidationInfo> ColumnTypes(
             SqlConnection connection, string query, string reportColumn, params TypeValidator[] columns)
         {
             using (var cmd = new SqlCommand(query, connection))
@@ -22,12 +25,12 @@ namespace Excel2SqlServer.Library
                 {
                     DataTable table = new DataTable();
                     adapter.Fill(table);
-                    return ValidateColumnTypes(table, reportColumn, columns);
+                    return ColumnTypes(table, reportColumn, columns);
                 }
             }
         }
 
-        public static IEnumerable<ValidationInfo> ValidateColumnTypes(
+        public static IEnumerable<ValidationInfo> ColumnTypes(
             DataTable dataTable, string reportColumn, params TypeValidator[] columns)
         {
             List<ValidationInfo> results = new List<ValidationInfo>();
@@ -47,7 +50,7 @@ namespace Excel2SqlServer.Library
             return results;
         }
 
-        public static async Task<IEnumerable<ValidationInfo>> ValidateSqlServerTypeConversionAsync<TKey, TValue>(
+        public static async Task<IEnumerable<ValidationInfo>> SqlServerTypeConversionAsync<TKey, TValue>(
             SqlConnection connection, string schema, string table, string keyColumn, string convertColumn, string convertType,
             string criteria = null)
         {
@@ -89,6 +92,103 @@ namespace Excel2SqlServer.Library
             }
 
             return results;
+        }
+
+        /// <summary>
+        /// gets columns in a source table with data that's too long for mapped destination columns.
+        /// columnMappings argument is source column to destination
+        /// </summary>
+        public static async Task<Dictionary<string, (int data, int allowed)>> GetOversizedDataAsync(
+            SqlConnection connection, ObjectName source, ObjectName destination, Dictionary<string, string> columnMappings)
+        {                                    
+            Dictionary<string, int> maxLengths = await GetMaxDataLengthsAsync(connection, source);
+
+            return await GetOversizedDataAsync(connection, maxLengths, destination, columnMappings);
+        }
+        
+        public static async Task<Dictionary<string, (int data, int allowed)>> GetOversizedDataAsync(
+            SqlConnection connection, Dictionary<string, int> maxDataLengths, ObjectName destination, Dictionary<string, string> columnMappings)
+        {
+            Dictionary<string, int> columnSizes = await GetColumnSizesAsync(connection, destination);
+
+            // we need to know the source columns that are too long, so we reverse the column mappings
+            var sourceMappings = columnMappings.ToDictionary(kp => kp.Value, kp => kp.Key);
+
+            return maxDataLengths
+                .Where(kp => kp.Value > columnSizes[kp.Key])
+                .ToDictionary(kp => sourceMappings[kp.Key], kp => (kp.Value, columnSizes[kp.Key]));
+        }
+
+        public static async Task EnsureNoOversizedDataAsync(
+            SqlConnection connection, ObjectName source, ObjectName destination, Dictionary<string, string> columnMappings)
+        {
+            Dictionary<string, int> maxLengths = await GetMaxDataLengthsAsync(connection, source);
+
+            await EnsureNoOversizedDataAsync(connection, maxLengths, destination, columnMappings);
+        }
+
+        public static async Task EnsureNoOversizedDataAsync(
+            SqlConnection connection, Dictionary<string, int> maxDataLengths, ObjectName destination, Dictionary<string, string> columnMappings)
+        {
+            var oversized = await GetOversizedDataAsync(connection, maxDataLengths, destination, columnMappings);
+
+            var sourceMappings = columnMappings.ToDictionary(kp => kp.Value, kp => kp.Key);
+
+            if (oversized.Any())
+            {
+                var message = string.Join("\r\n", oversized.Select(kp => $"Data with length {kp.Value.data} in {sourceMappings[kp.Key]} column can't insert into {destination.Schema}.{destination.Name}.{columnMappings[kp.Key]} with max length {kp.Value.allowed}"));
+                var exc = new Exception(message);
+                foreach (var kp in oversized) exc.Data.Add(kp.Key, kp.Value);
+                throw exc;
+            }
+        }
+
+        private static async Task<Dictionary<string, int>> GetColumnSizesAsync(SqlConnection connection, ObjectName table)
+        {
+            var data = await connection.QueryAsync<ColumnSizeInfoResult>(
+                @"DECLARE @sizers TABLE (
+                    [Name] nvarchar(50) NOT NULL,
+                    [Divisor] int NOT NULL
+                )
+
+                INSERT INTO @sizers ([Name], [Divisor]) 
+                VALUES ('varchar', 1), ('nvarchar', 2), ('varbinary', 1)
+
+                SELECT
+                    [col].[name] AS [ColumnName],
+                    [col].[max_length] / [s].[Divisor] AS [MaxSize]
+                FROM
+                    [sys].[columns] [col]
+                    INNER JOIN @sizers [s] ON TYPE_NAME([col].[system_type_id])=[s].[Name]
+                WHERE
+                    [object_id]=OBJECT_ID(@objectName) AND    
+                    [max_length] > -1", new
+                {
+                    objectName = table.ToString()
+                });
+
+            return data.ToDictionary(row => row.ColumnName, row => row.MaxSize);
+        }
+
+        public static async Task<Dictionary<string, int>> GetMaxDataLengthsAsync(SqlConnection connection, ObjectName table)
+        {
+            var columnNames = await connection.GetColumnNamesAsync(table);
+
+            var results = new Dictionary<string, int>();
+
+            foreach (var col in columnNames)
+            {
+                int dataLength = await connection.QuerySingleOrDefaultAsync<int>($"SELECT MAX(LEN([{col}])) FROM [{table.Schema}].[{table.Name}]");
+                results.Add(col, dataLength);
+            }
+
+            return results;
+        }
+
+        public class ColumnSizeInfoResult
+        {
+            public string ColumnName { get; set; }
+            public int MaxSize { get; set; }
         }
     }
 
