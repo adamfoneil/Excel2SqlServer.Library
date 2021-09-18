@@ -10,8 +10,8 @@
     <PackageProjectUrl>https://github.com/adamosoftware/Excel2SqlServer.Library</PackageProjectUrl>
     <RepositoryUrl>https://github.com/adamosoftware/Excel2SqlServer.Library</RepositoryUrl>
     <Description>Library for importing Excel spreadsheets into SQL Server tables</Description>
-    <Version>1.2.4</Version>
-    <PackageReleaseNotes>new SqlBulkCopy support</PackageReleaseNotes>
+    <Version>1.2.5</Version>
+    <PackageReleaseNotes>https://github.com/adamfoneil/Excel2SqlServer.Library/issues/11</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
