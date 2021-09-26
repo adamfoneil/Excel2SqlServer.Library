@@ -1,6 +1,6 @@
 using Dapper.CX.SqlServer;
 using Excel2SqlServer.Library;
-using Microsoft.Data.SqlClient;
+using System.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SqlServer.LocalDb;
 using SqlServer.LocalDb.Models;

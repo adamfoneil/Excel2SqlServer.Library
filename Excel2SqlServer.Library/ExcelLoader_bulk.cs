@@ -1,7 +1,7 @@
 ﻿using AO.Models;
-using Microsoft.Data.SqlClient;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -46,7 +46,8 @@ namespace Excel2SqlServer.Library
 
                 await bcp.WriteToServerAsync(table);
 
-                return bcp.RowsCopied;
+                //return bcp.RowsCopied;
+                return 0;
             }
         }
     }

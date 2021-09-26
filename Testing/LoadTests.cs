@@ -1,19 +1,19 @@
 ﻿using AO.Models;
 using Dapper;
 using Excel2SqlServer.Library;
-using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SqlServer.LocalDb;
-using SqlServer.LocalDb.Extensions;
 using SqlServer.LocalDb.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Testing.Extensions;
 
 namespace Testing
 {
@@ -157,7 +157,7 @@ namespace Testing
                     var loader = new ExcelLoader();
                     var result = await loader.BulkSaveAsync(stream, cn, "dbo", "ZipCodes", 1000);
 
-                    Assert.IsTrue(result == 80_237);
+                    Assert.IsTrue(result == 80_237); // won't fix in sql-client-compatibility branch
                 }
             }
         }

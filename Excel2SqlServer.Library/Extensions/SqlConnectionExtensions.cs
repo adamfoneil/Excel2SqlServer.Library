@@ -1,7 +1,7 @@
 ﻿using AO.Models;
 using Dapper;
-using Microsoft.Data.SqlClient;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Threading.Tasks;
 
 namespace Excel2SqlServer.Library.Extensions
