@@ -1,6 +1,5 @@
 ﻿using AO.Models;
 using Dapper;
-using DataTables.Library;
 using Excel2SqlServer.Library.Extensions;
 using ExcelDataReader;
 using Microsoft.Data.SqlClient;
@@ -183,7 +182,7 @@ namespace Excel2SqlServer.Library
                 if (options?.RemoveNonPrintingChars ?? false)
                 {
                     const string nonPrintingChars = @"[^\x00-\x7F]+";
-                    var dataTable = connection.QueryTable($"SELECT * FROM [{objName.Schema}].[{objName.Name}]");
+                    var dataTable = QueryTable(connection, $"SELECT * FROM [{objName.Schema}].[{objName.Name}]");
                     foreach (DataRow row in dataTable.Rows)
                     {
                         var expressions = new Dictionary<string, string>();
@@ -203,6 +202,19 @@ namespace Excel2SqlServer.Library
                                 new { id = row.Field<int>("Id") });
                         }
                     }
+                }
+            }
+        }
+
+        private DataTable QueryTable(SqlConnection connection, string sql)
+        {
+            using (var cmd = new SqlCommand(sql, connection))
+            {
+                using (var adapter = new SqlDataAdapter(cmd))
+                {
+                    DataTable result = new DataTable();
+                    adapter.Fill(result);
+                    return result;
                 }
             }
         }

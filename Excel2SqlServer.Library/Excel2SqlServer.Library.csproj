@@ -10,16 +10,16 @@
     <PackageProjectUrl>https://github.com/adamosoftware/Excel2SqlServer.Library</PackageProjectUrl>
     <RepositoryUrl>https://github.com/adamosoftware/Excel2SqlServer.Library</RepositoryUrl>
     <Description>Library for importing Excel spreadsheets into SQL Server tables</Description>
-    <Version>1.2.8</Version>
-    <PackageReleaseNotes>https://github.com/adamfoneil/Excel2SqlServer.Library/issues/11</PackageReleaseNotes>
+    <Version>1.2.9</Version>
+    <PackageReleaseNotes>removed DataTables.Library dependency due to bad Azure Function interaction</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Copyright>Copyright (c) 2021 Adam O'Neil</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AO.Models" Version="1.1.38" />
     <PackageReference Include="Dapper" Version="2.0.35" />
-    <PackageReference Include="DataTables.Library" Version="2.0.13" />
     <PackageReference Include="ExcelDataReader" Version="3.6.0" />
     <PackageReference Include="ExcelDataReader.DataSet" Version="3.6.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.0.1" />
