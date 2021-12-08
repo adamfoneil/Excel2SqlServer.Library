@@ -53,25 +53,6 @@ Note, if you see an error like this...
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 ```
 
-## Reference
-- Task [CreateTableAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L19)
- (string fileName, SqlConnection connection, string schemaName, string tableName, [ IEnumerable<string> customColumns ])
-- Task [CreateTableAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L25)
- (Stream stream, SqlConnection connection, string schemaName, string tableName, [ IEnumerable<string> customColumns ])
-- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L109)
- (string fileName, SqlConnection connection, [ Dictionary<string, ObjectName> tableNames ], [ [Options](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs#L5) options ])
-- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L115)
- (string fileName, SqlConnection connection, string schemaName, string tableName, [ [Options](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs#L5) options ])
-- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L121)
- (Stream stream, SqlConnection connection, [ Dictionary<string, ObjectName> tableNames ], [ [Options](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs#L5) options ])
-- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L127)
- (Stream stream, SqlConnection connection, string schemaName, string tableName, [ [Options](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs#L5) options ])
-- Task\<DataSet\> [ReadAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L241)
- (string fileName)
-- Task\<DataSet\> [ReadAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L249)
- (Stream stream)
-
-
 ## Inline Lookup Feature
 Use the [InlineLookup\<T\>](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/InlineLookup.cs) class to convert string values to corresponding key values. The `T` generic argument indicates the type of keys being used. Currently `int` is the only type supported. For users who need to upload spreadsheets with key values, allowing them to use text values instead of numeric keys can make an upload process easier.
 
@@ -93,9 +74,51 @@ Use the [Validate](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/ma
  (SqlConnection connection, ObjectName source, ObjectName destination, Dictionary<string, string> columnMappings)
 - Task\<Dictionary\<string, (string value, int length, int allowed)\>\> [GetOversizedDataAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Validate.cs#L109)
  (SqlConnection connection, Dictionary<string, (string value, int length)> maxDataLengths, ObjectName destination, Dictionary<string, string> columnMappings)
-- Task [EnsureNoOversizedDataAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Validate.cs#L124)
+- Task [EnsureNoOversizedDataAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Validate.cs#L125)
  (SqlConnection connection, ObjectName source, ObjectName destination, Dictionary<string, string> columnMappings)
-- Task [EnsureNoOversizedDataAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Validate.cs#L132)
+- Task [EnsureNoOversizedDataAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Validate.cs#L133)
  (SqlConnection connection, Dictionary<string, (string value, int length)> maxDataLengths, ObjectName destination, Dictionary<string, string> columnMappings)
-- Task\<Dictionary\<string, (string value, int length)\>\> [GetMaxDataLengthsAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Validate.cs#L175)
+- Task\<Dictionary\<string, (string value, int length)\>\> [GetMaxDataLengthsAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Validate.cs#L176)
  (SqlConnection connection, ObjectName table)
+
+# Reference
+## Excel2SqlServer.Library.ExcelLoader [ExcelLoader.cs](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs)
+- Task [CreateTableAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L18)
+ (string fileName, SqlConnection connection, string schemaName, string tableName, [ IEnumerable<string> customColumns ])
+- Task [CreateTableAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L24)
+ (Stream stream, SqlConnection connection, string schemaName, string tableName, [ IEnumerable<string> customColumns ])
+- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L108)
+ (string fileName, SqlConnection connection, [ Dictionary<string, ObjectName> tableNames ], [ [Options](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs#L5) options ])
+- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L114)
+ (string fileName, SqlConnection connection, string schemaName, string tableName, [ [Options](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs#L5) options ])
+- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L120)
+ (Stream stream, SqlConnection connection, [ Dictionary<string, ObjectName> tableNames ], [ [Options](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs#L5) options ])
+- Task\<int\> [SaveAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L126)
+ (Stream stream, SqlConnection connection, string schemaName, string tableName, [ [Options](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Options.cs#L5) options ])
+- Task\<DataSet\> [ReadAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L253)
+ (string fileName)
+- Task\<DataSet\> [ReadAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/ExcelLoader.cs#L261)
+ (Stream stream)
+
+## Excel2SqlServer.Library.InlineLookup [InlineLookup.cs](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/InlineLookup.cs#L13)
+### Properties
+- string [SourceTable](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/InlineLookup.cs#L23)
+- string [IdentityColumn](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/InlineLookup.cs#L24)
+- string [ResultTable](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/InlineLookup.cs#L25)
+- Dictionary\<string, Lookup\> [Lookups](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/InlineLookup.cs#L26)
+### Methods
+- Task [ExecuteAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/InlineLookup.cs#L31)
+ (SqlConnection connection)
+- Task\<ILookup\<string, string\>\> [GetErrorsAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/InlineLookup.cs#L98)
+ (SqlConnection cn)
+
+## Excel2SqlServer.Library.Extensions.SqlConnectionExtensions [SqlConnectionExtensions.cs](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Extensions/SqlConnectionExtensions.cs#L9)
+### Methods
+- bool [TableExists](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Extensions/SqlConnectionExtensions.cs#L11)
+ (this SqlConnection connection, string schemaName, string tableName)
+- bool [SchemaExists](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Extensions/SqlConnectionExtensions.cs#L18)
+ (this SqlConnection connection, string schemaName)
+- Task\<IEnumerable\<string\>\> [GetColumnNamesAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Extensions/SqlConnectionExtensions.cs#L24)
+ (this SqlConnection connection, string schemaName, string tableName)
+- Task\<IEnumerable\<string\>\> [GetColumnNamesAsync](https://github.com/adamfoneil/Excel2SqlServer.Library/blob/master/Excel2SqlServer.Library/Extensions/SqlConnectionExtensions.cs#L27)
+ (this SqlConnection connection, ObjectName table)
